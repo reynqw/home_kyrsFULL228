@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/base}">
+<head>
+    <title>Просмотр журнала</title>
+    <style>
+        body { background: #111; color: #fff; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; }
+        .content-box { background: #181818; border-radius: 18px; box-shadow: 0 4px 32px 0 rgba(0,0,0,0.45); border: 1px solid #222; padding: 2.5rem 2rem; max-width: 1200px; margin: 3rem auto; }
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1.2rem; }
+        .filters { background: #222; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+        .filters form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .filter-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .filter-group label { color: #bbb; font-size: 0.9rem; }
+        .filter-group input, .filter-group select { background: #333; border: 1px solid #444; border-radius: 6px; padding: 0.5rem; color: #fff; }
+        .filter-group input:focus, .filter-group select:focus { outline: none; border-color: #666; }
+        .filter-buttons { grid-column: 1 / -1; display: flex; gap: 1rem; justify-content: flex-end; }
+        .btn { background: #333; color: #fff; border: none; border-radius: 6px; padding: 0.5rem 1rem; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: #444; }
+        .btn-primary { background: #0066cc; }
+        .btn-primary:hover { background: #0052a3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 2rem; background: #222; border-radius: 12px; overflow: hidden; }
+        th, td { padding: 0.9rem 1rem; text-align: left; }
+        th { background: #191919; color: #fff; font-weight: 600; border-bottom: 1.5px solid #333; }
+        th.sortable { cursor: pointer; }
+        th.sortable:hover { background: #252525; }
+        td { color: #eee; border-bottom: 1px solid #222; }
+        tr:last-child td { border-bottom: none; }
+        .no-logs { color: #888; text-align: center; margin-top: 2.5rem; font-size: 1.1rem; }
+        .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem; }
+        .pagination a { background: #333; color: #fff; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; }
+        .pagination a:hover { background: #444; }
+        .pagination .active { background: #0066cc; }
+        .pagination .disabled { opacity: 0.5; cursor: not-allowed; }
+        .back-button { position: absolute; top: 24px; left: 24px; z-index: 9999; background: #222; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: background 0.2s; }
+        .back-button:hover { background: #333; }
+        .device-value { color: #4CAF50; font-weight: 500; }
+        .action-type { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem; }
+        .action-type-turn-on { background: #4CAF50; color: #fff; }
+        .action-type-turn-off { background: #f44336; color: #fff; }
+        .action-type-set { background: #2196F3; color: #fff; }
+    </style>
+</head>
+<body>
+<button onclick="goBackOrDashboard()" class="back-button"><i class="fas fa-arrow-left"></i> Назад</button>
+
+<div class="content-box">
+    <h1>Просмотр журнала действий</h1>
+    
+    <div class="filters">
+        <form th:action="@{/logs}" method="get">
+            <div class="filter-group">
+                <label for="startDate">Начальная дата</label>
+                <input type="datetime-local" id="startDate" name="startDate" th:value="${startDate}">
+            </div>
+            <div class="filter-group">
+                <label for="endDate">Конечная дата</label>
+                <input type="datetime-local" id="endDate" name="endDate" th:value="${endDate}">
+            </div>
+            <div class="filter-group">
+                <label for="deviceId">ID устройства</label>
+                <input type="number" id="deviceId" name="deviceId" th:value="${deviceId}">
+            </div>
+            <div class="filter-group">
+                <label for="ruleId">ID правила</label>
+                <input type="number" id="ruleId" name="ruleId" th:value="${ruleId}">
+            </div>
+            <div class="filter-group">
+                <label for="actionType">Тип действия</label>
+                <select id="actionType" name="actionType">
+                    <option value="">Все типы</option>
+                    <option th:each="type : ${actionTypes}"
+                            th:value="${type}"
+                            th:text="${type}"
+                            th:selected="${type == actionType}"></option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="pageSize">Записей на странице</label>
+                <select id="pageSize" name="size">
+                    <option value="10" th:selected="${pageSize == 10}">10</option>
+                    <option value="25" th:selected="${pageSize == 25}">25</option>
+                    <option value="50" th:selected="${pageSize == 50}">50</option>
+                    <option value="100" th:selected="${pageSize == 100}">100</option>
+                </select>
+            </div>
+            <div class="filter-buttons">
+                <button type="submit" class="btn btn-primary">Применить фильтры</button>
+                <a th:href="@{/logs}" class="btn">Сбросить</a>
+            </div>
+        </form>
+    </div>
+
+    <div th:if="${#lists.isEmpty(logs.content)}" class="no-logs">
+        Нет записей в журнале.
+    </div>
+    
+    <table th:if="${!#lists.isEmpty(logs.content)}">
+        <thead>
+            <tr>
+                <th class="sortable" th:onclick="'window.location.href=\'' + @{/logs(page=${currentPage},size=${pageSize},sortBy='датаВремя',direction=${direction == 'asc' ? 'desc' : 'asc'})} + '\''">
+                    Дата и время
+                    <span th:if="${sortBy == 'датаВремя'}" th:text="${direction == 'asc' ? '↑' : '↓'}"></span>
+                </th>
+                <th>Устройство</th>
+                <th>Тип действия (id_правила)</th>
+                <th>Значение (выполнено)</th>
+                <th>Результат</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="log : ${logs.content}">
+                <td th:text="${#temporals.format(log.датаВремя, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                <td th:text="${log.устройство.название}"></td>
+                <td th:text="${log.правило != null ? log.правило.id : ''}"></td>
+                <td th:text="${log.выполнено}"></td>
+                <td th:text="${log.результат}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${logs.totalPages > 1}" class="pagination">
+        <a th:if="${currentPage > 0}" th:href="@{/logs(page=${currentPage - 1},size=${pageSize},sortBy=${sortBy},direction=${direction},startDate=${startDate},endDate=${endDate},deviceId=${deviceId},ruleId=${ruleId})}">←</a>
+        <a th:each="i : ${#numbers.sequence(0, logs.totalPages - 1)}"
+           th:href="@{/logs(page=${i},size=${pageSize},sortBy=${sortBy},direction=${direction},startDate=${startDate},endDate=${endDate},deviceId=${deviceId},ruleId=${ruleId})}"
+           th:text="${i + 1}"
+           th:class="${i == currentPage ? 'active' : ''}"></a>
+        <a th:if="${currentPage < logs.totalPages - 1}" th:href="@{/logs(page=${currentPage + 1},size=${pageSize},sortBy=${sortBy},direction=${direction},startDate=${startDate},endDate=${endDate},deviceId=${deviceId},ruleId=${ruleId})}">→</a>
+    </div>
+</div>
+
+<script>
+function goBackOrDashboard() {
+    if (document.referrer && document.referrer.includes('/dashboard')) {
+        window.history.back();
+    } else {
+        window.location.href = '/dashboard';
+    }
+}
+</script>
+</body>
+</html> 

@@ -1,0 +1,1 @@
+ALTER TABLE журнал_действий MODIFY COLUMN id_правила INT NULL; 

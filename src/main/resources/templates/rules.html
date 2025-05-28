@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>Настройка правил</title>
+    <style>
+        body { background: #111; color: #fff; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; }
+        .content-box { background: #181818; border-radius: 18px; box-shadow: 0 4px 32px 0 rgba(0,0,0,0.45); border: 1px solid #222; padding: 2.5rem 2rem; max-width: 700px; margin: 3rem auto; }
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1.2rem; }
+        p { color: #bbb; }
+        .placeholder { margin-top: 2.5rem; color: #888; font-size: 1.1rem; text-align: center; }
+    </style>
+</head>
+<body>
+<button onclick="goBackOrDashboard()" style="position: absolute; top: 24px; left: 24px; z-index: 9999; background: #222; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: background 0.2s;"><i class="fas fa-arrow-left"></i> Назад</button>
+<div class="content-box">
+    <h1>Настройка правил</h1>
+    <p>Здесь вы можете создавать и редактировать автоматизации для вашего умного дома.</p>
+    <div th:if="${#lists.isEmpty(rules)}" class="placeholder">
+        Нет созданных правил.
+    </div>
+    <div th:if="${!#lists.isEmpty(rules)}">
+        <div th:each="rule : ${rules}" class="rule-block" style="margin-bottom:2.5rem;">
+            <h2 th:text="${rule.название}">Название правила</h2>
+            <div>
+                <b>Активно:</b> <span th:text="${rule.активно ? 'Да' : 'Нет'}"></span>
+                <b style="margin-left:2em;">Дата создания:</b> <span th:text="${#temporals.format(rule.датаСоздания, 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
+            <div style="margin-top:1em;">
+                <b>Условия:</b>
+                <ul>
+                    <li th:each="cond : ${rule.условия}">
+                        <span th:text="${cond.устройство.название}"></span>
+                        <span th:text="${cond.оператор.symbol}"></span>
+                        <span th:text="${cond.значение}"></span>
+                        <span th:text="'(' + cond.логика + ')'"></span>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <b>Действия:</b>
+                <ul>
+                    <li th:each="act : ${rule.действия}">
+                        <span th:text="${act.цель.название}"></span>
+                        <span th:text="${act.типДействия.value}"></span>
+                        <span th:if="${act.значение != null}" th:text=": ' + act.значение"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function goBackOrDashboard() {
+    if (document.referrer && document.referrer.includes('/dashboard')) {
+        window.history.back();
+    } else {
+        window.location.href = '/dashboard';
+    }
+}
+</script>
+</body>
+</html> 

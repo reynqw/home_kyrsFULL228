@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Панель администратора</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .admin-header {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5em;
+            margin-top: 2em;
+        }
+        .admin-table {
+            background: #181818;
+            color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.25);
+        }
+        .admin-table th, .admin-table td {
+            border: none;
+            background: #181818;
+            color: #fff;
+            vertical-align: middle;
+        }
+        .admin-table th {
+            font-weight: 600;
+            background: #222;
+        }
+        .admin-table tr {
+            border-bottom: 1px solid #222;
+        }
+        .admin-table tr:last-child {
+            border-bottom: none;
+        }
+        .btn-primary {
+            background: #fff;
+            color: #111;
+            border: none;
+            font-weight: 600;
+            font-size: 1em;
+            border-radius: 6px;
+            padding: 6px 18px;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background: #e0e0e0;
+            color: #111;
+        }
+        .alert-info {
+            background: #222;
+            color: #fff;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center" style="height: 64px; background: #111;">
+        <div>
+            <!-- Back button: hidden on main admin dashboard -->
+        </div>
+        <div>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-light" style="background:#fff;color:#111;font-weight:600;border-radius:8px;padding:6px 18px;margin-right:24px;">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="container mt-5">
+        <h1 class="admin-header">Панель администратора</h1>
+        <div th:if="${users.size() == 0}">
+            <div class="alert alert-info">Нет пользователей.</div>
+        </div>
+        <div class="table-responsive">
+            <table class="table admin-table align-middle admin-users-table">
+                <thead>
+                    <tr>
+                        <th>Логин</th>
+                        <th>Email</th>
+                        <th>Роль</th>
+                        <th>Устройств</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.username}"></td>
+                        <td th:text="${user.email}"></td>
+                        <td th:text="${user.role}"></td>
+                        <td th:text="${user.userDevices != null ? user.userDevices.size() : 0}"></td>
+                        <td>
+                            <a th:href="@{'/admin/user/' + ${user.userId}}" class="btn btn-primary btn-sm">Подробнее</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <h2 class="admin-header" style="margin-top:2.5em;">Все устройства</h2>
+        <div class="table-responsive">
+            <table class="table admin-table align-middle admin-devices-table">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Расположение</th>
+                        <th>Состояние</th>
+                        <th>Дата добавления</th>
+                        <th>Владелец</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="device : ${devices}">
+                        <td th:text="${device.название}"></td>
+                        <td th:text="${device.тип}"></td>
+                        <td th:text="${device.расположение}"></td>
+                        <td th:text="${device.состояние}"></td>
+                        <td th:text="${device.датаДобавления} ? ${#temporals.format(device.датаДобавления, 'yyyy-MM-dd HH:mm')} : ''"></td>
+                        <td th:text="${device.пользователь != null ? device.пользователь.username : '—'}"></td>
+                    </tr>
+                    <tr th:if="${devices == null || devices.isEmpty()}"><td colspan="6">Нет устройств.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    // Back button logic for all pages except main admin dashboard
+    if (window.location.pathname !== '/admin/dashboard') {
+        const backBtn = document.createElement('button');
+        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Назад';
+        backBtn.className = 'btn btn-outline-light';
+        backBtn.style = 'background:#fff;color:#111;font-weight:600;border-radius:8px;padding:6px 18px;margin-left:24px;';
+        backBtn.onclick = function() { window.history.back(); };
+        document.querySelector('.d-flex > div').appendChild(backBtn);
+    }
+</script>
+</body>
+</html> 

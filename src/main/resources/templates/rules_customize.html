@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/base}">
+<head>
+    <title>Настройка правил для устройств</title>
+    <style>
+        body { background: #111; color: #fff; font-family: 'Inter', 'Segoe UI', Arial, sans-serif; }
+        .content-box { background: #181818; border-radius: 18px; box-shadow: 0 4px 32px 0 rgba(0,0,0,0.45); border: 1px solid #222; padding: 2.5rem 2rem; max-width: 900px; margin: 3rem auto; }
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 1.2rem; }
+        .device-block { margin-bottom: 2.5rem; }
+        .device-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .rules-list { margin-left: 1.5em; }
+        .rule-item { margin-bottom: 0.5em; }
+        .no-rules { color: #888; font-size: 1em; }
+    </style>
+</head>
+<body>
+<div class="content-box">
+    <h1>Настройка правил для ваших устройств</h1>
+    <div th:if="${#lists.isEmpty(deviceRules)}" class="no-rules">
+        Нет устройств или правил для отображения.
+    </div>
+    <div th:each="entry : ${deviceRules}">
+        <div class="device-block">
+            <div class="device-title">
+                <span th:text="${entry.key.название}"></span>
+                <span style="color:#bbb; font-size:0.95em;">(<span th:text="${entry.key.тип}"></span>)</span>
+            </div>
+            <ul class="rules-list">
+                <li th:each="rule : ${entry.value}" class="rule-item">
+                    <b th:text="${rule.name}"></b>
+                    <span th:if="${!rule.активно}" style="color:#f55;">(Не активно)</span>
+                </li>
+                <li th:if="${#lists.isEmpty(entry.value)}" class="no-rules">Нет связанных правил.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html> 

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Регистрация - Умный дом</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #111;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+        .signup-card {
+            margin-top: 10vh;
+            background: #181818;
+            border-radius: 14px;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.25);
+            border: none;
+        }
+        .signup-title {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.2em;
+        }
+        .signup-subtitle {
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 1.2em;
+        }
+        .smart-home-icon {
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 0.5em;
+        }
+        .form-label, .input-group-text {
+            color: #fff;
+            font-size: 0.97em;
+        }
+        .form-control {
+            background: #111;
+            color: #fff;
+            border: 1px solid #222;
+            font-size: 1em;
+        }
+        .form-control:focus {
+            background: #181818;
+            color: #fff;
+            border: 1.5px solid #fff;
+        }
+        .btn-primary {
+            background: #fff;
+            color: #111;
+            border: none;
+            font-weight: 600;
+            font-size: 1em;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background: #e0e0e0;
+            color: #111;
+        }
+        .btn-outline-secondary {
+            border: 1.2px solid #bbb;
+            color: #bbb;
+            background: transparent;
+            font-size: 1em;
+        }
+        .btn-outline-secondary:hover, .btn-outline-secondary:focus {
+            background: #222;
+            color: #fff;
+            border-color: #fff;
+        }
+        .alert {
+            border-radius: 8px;
+            font-size: 0.97em;
+        }
+        .form-hint {
+            font-size: 0.9em;
+            color: #bbb;
+        }
+        .text-muted {
+            color: #e0e0e0 !important;
+        }
+    </style>
+</head>
+<body>
+<button onclick="goBackOrDashboard()" style="position: absolute; top: 24px; left: 24px; z-index: 9999; background: #222; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; transition: background 0.2s;"><i class="fas fa-arrow-left"></i> Назад</button>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card signup-card p-4">
+                <div class="text-center mb-3">
+                    <i class="fas fa-home smart-home-icon"></i>
+                    <h2 class="signup-title">Регистрация</h2>
+                    <div class="signup-subtitle">Создайте аккаунт для управления умным домом</div>
+                </div>
+                <form id="signupForm" novalidate>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Логин</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required pattern="[A-Za-z0-9]{4,20}" minlength="4" maxlength="20">
+                        </div>
+                        <div class="form-hint">Только латинские буквы и цифры, 4-20 символов.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required minlength="8">
+                            <span class="input-group-text" style="cursor:pointer; background: #181818; border-left: 1px solid #222;" onclick="togglePasswordVisibility()">
+                                <i class="fa fa-eye" id="togglePasswordIcon" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                        <div class="form-hint">Минимум 8 символов, хотя бы одна заглавная или строчная буква и одна цифра.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Роль</label>
+                        <select class="form-control" id="role" name="role" required>
+                            <option value="USER">Пользователь</option>
+                            <option value="ADMIN">Администратор</option>
+                        </select>
+                    </div>
+                    <div id="signupMessage" class="mt-3"></div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <a href="/login">Уже есть аккаунт? Войти</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function validatePassword(password) {
+        return /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && password.length >= 8;
+    }
+    function validateUsername(username) {
+        return /^[A-Za-z0-9]{4,20}$/.test(username);
+    }
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const role = document.getElementById('role').value;
+        const messageDiv = document.getElementById('signupMessage');
+        messageDiv.innerHTML = '';
+        if (!validateUsername(username)) {
+            messageDiv.innerHTML = '<div class="alert alert-danger">Логин должен содержать только латинские буквы и цифры, 4-20 символов.</div>';
+            return;
+        }
+        if (!validatePassword(password)) {
+            messageDiv.innerHTML = '<div class="alert alert-danger">Пароль должен быть не менее 8 символов и содержать хотя бы одну заглавную, одну строчную букву и одну цифру.</div>';
+            return;
+        }
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password, role })
+            });
+            if (response.ok) {
+                window.location.href = '/login';
+            } else {
+                const error = await response.text();
+                messageDiv.innerHTML = `<div class="alert alert-danger">${error}</div>`;
+            }
+        } catch (err) {
+            messageDiv.innerHTML = '<div class="alert alert-danger">Произошла ошибка. Попробуйте еще раз.</div>';
+        }
+    });
+    function goBackOrDashboard() {
+        if (document.referrer && document.referrer.includes('/dashboard')) {
+            window.history.back();
+        } else {
+            window.location.href = '/dashboard';
+        }
+    }
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const icon = document.getElementById('togglePasswordIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+</body>
+</html> 

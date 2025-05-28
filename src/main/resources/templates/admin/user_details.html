@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Пользователь: [[${user.username}]]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #111;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .admin-header {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5em;
+            margin-top: 2em;
+        }
+        .admin-card {
+            background: #181818;
+            color: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.25);
+            border: none;
+            padding: 2em 2em 1em 2em;
+            margin-bottom: 2em;
+        }
+        .admin-table {
+            background: #181818;
+            color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.25);
+        }
+        .admin-table th, .admin-table td {
+            border: none;
+            background: #181818;
+            color: #fff;
+            vertical-align: middle;
+        }
+        .admin-table th {
+            font-weight: 600;
+            background: #222;
+        }
+        .admin-table tr {
+            border-bottom: 1px solid #222;
+        }
+        .admin-table tr:last-child {
+            border-bottom: none;
+        }
+        .btn-primary, .btn-secondary {
+            background: #fff;
+            color: #111;
+            border: none;
+            font-weight: 600;
+            font-size: 1em;
+            border-radius: 6px;
+            padding: 6px 18px;
+        }
+        .btn-primary:hover, .btn-primary:focus, .btn-secondary:hover, .btn-secondary:focus {
+            background: #e0e0e0;
+            color: #111;
+        }
+        .alert-info {
+            background: #222;
+            color: #fff;
+            border: none;
+        }
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-top: 1.5em;
+            margin-bottom: 0.7em;
+            color: #fff;
+        }
+        .user-info-row {
+            margin-bottom: 0.5em;
+        }
+        .user-info-label {
+            color: #bbb;
+            font-weight: 400;
+            margin-right: 0.5em;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <a href="/admin/dashboard" class="btn btn-secondary mb-3">Назад к списку пользователей</a>
+    <div class="admin-card">
+        <h2 class="admin-header">Пользователь: <span th:text="${user.username}"></span></h2>
+        <div class="user-info-row"><span class="user-info-label">Email:</span> <span th:text="${user.email}"></span></div>
+        <div class="user-info-row"><span class="user-info-label">Роль:</span> <span th:text="${user.role}"></span></div>
+        <div class="section-title">Устройства</div>
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Расположение</th>
+                        <th>Состояние</th>
+                        <th>Дата добавления</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="userDevice : ${user.userDevices}">
+                        <td th:text="${userDevice.device.название}"></td>
+                        <td th:text="${userDevice.device.тип}"></td>
+                        <td th:text="${userDevice.device.расположение}"></td>
+                        <td th:text="${userDevice.value}"></td>
+                        <td th:text="${userDevice.addedAt} ? ${#temporals.format(userDevice.addedAt, 'yyyy-MM-dd HH:mm')} : ''"></td>
+                    </tr>
+                    <tr th:if="${user.userDevices == null || user.userDevices.isEmpty()}"><td colspan="5">Нет устройств.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="section-title">Журнал действий</div>
+        <div class="table-responsive">
+            <table class="table admin-table">
+                <thead>
+                    <tr>
+                        <th>Дата/время</th>
+                        <th>Действие</th>
+                        <th>Результат</th>
+                        <th>Устройство</th>
+                        <th>Значение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td th:text="${log.датаВремя} ? ${#temporals.format(log.датаВремя, 'yyyy-MM-dd HH:mm')} : ''"></td>
+                        <td th:text="${log.выполнено}"></td>
+                        <td th:text="${log.результат}"></td>
+                        <td th:text="${log.устройство.название}"></td>
+                        <td th:text="${log.значениеУстройства}"></td>
+                    </tr>
+                    <tr th:if="${logs == null || logs.isEmpty()}"><td colspan="5">Нет записей в журнале.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html> 

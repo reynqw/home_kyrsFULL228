@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - Умный дом">Умный дом</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            background-color: #343a40;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+            transition: background-color 0.3s;
+        }
+        
+        .sidebar a:hover {
+            background-color: #495057;
+            color: #fff;
+        }
+        
+        .sidebar i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        }
+    </style>
+    
+    <th:block layout:fragment="styles"></th:block>
+</head>
+<body>
+    <!-- Back Button (not on login page) -->
+    <th:block th:if="${#httpServletRequest.requestURI != '/login'}">
+        <button onclick="window.history.back()" style="position:fixed;top:18px;left:18px;z-index:9999;background:#222;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,0.15);cursor:pointer;transition:background 0.2s;">
+            <i class="fas fa-arrow-left"></i> Назад
+        </button>
+    </th:block>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-home"></i> Умный дом
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                        <form th:action="@{/logout}" method="post" class="d-inline" id="logoutForm">
+                            <button type="submit" class="btn btn-link nav-link">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar" th:if="${#authorization.expression('isAuthenticated()')}">
+                <div class="d-flex flex-column">
+                    <th:block th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                        <a href="/admin/dashboard" class="active">
+                            <i class="fas fa-users-cog"></i> Админ-панель
+                        </a>
+                        <!-- можно добавить другие админ-ссылки -->
+                    </th:block>
+                    <th:block th:if="${#authorization.expression('hasRole(''USER'')')}">
+                        <a href="/dashboard" class="active">
+                            <i class="fas fa-home"></i> Главная
+                        </a>
+                        <a href="/devices">
+                            <i class="fas fa-microchip"></i> Устройства
+                        </a>
+                        <a href="/rules">
+                            <i class="fas fa-cogs"></i> Правила
+                        </a>
+                        <a href="/logs">
+                            <i class="fas fa-history"></i> Журнал
+                        </a>
+                        <a href="/profile">
+                            <i class="fas fa-user"></i> Профиль
+                        </a>
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 main-content" th:classappend="${#authorization.expression('isAuthenticated()') ? '' : 'offset-md-1'}">
+                <div layout:fragment="content">
+                    <!-- сюда будет вставлено содержимое страницы -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <th:block layout:fragment="scripts"></th:block>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var logoutForm = document.getElementById('logoutForm');
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function() {
+                setTimeout(function() {
+                    window.location.href = '/login';
+                }, 300);
+            });
+        }
+    });
+    </script>
+</body>
+</html> 
